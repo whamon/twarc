@@ -466,13 +466,37 @@ class Twarc(object):
             except Exception as e:
                 log.error("uhoh: %s\n" % e)
 
-    def hydrate(self, iterator):
+    def hydrate(self, iterator, labs=False):
         """
         Pass in an iterator of tweet ids and get back an iterator for the
         decoded JSON for each corresponding tweet.
+
+        If you would like to use the experimental labs endpoint you can 
+        set the labs parameter to True.
         """
         ids = []
         url = "https://api.twitter.com/1.1/statuses/lookup.json"
+        labs_url = "https://api.twitter.com/labs/1/tweets"
+
+        # labs has a different endpoint and parameters
+        def get(ids):
+            if labs:
+                tweets = self.get(labs_url, params={
+                    "ids": ",".join(ids),
+                    "format": "detailed",
+                    "tweet.format": "detailed",
+                    "user.format": "detailed",
+                    "place.format": "detailed",
+                    "expansions": "attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id"
+                }).json()["data"]
+                tweets.sort(key=lambda t: t["id"])
+            else:
+                tweets = self.post(url, data={
+                    "id": ",".join(ids),
+                    "include_ext_alt_text": "true"
+                }).json()
+                tweets.sort(key=lambda t: t["id_str"])
+            return tweets
 
         # lookup 100 tweets at a time
         for tweet_id in iterator:
@@ -481,24 +505,14 @@ class Twarc(object):
             ids.append(tweet_id)
             if len(ids) == 100:
                 log.info("hydrating %s ids", len(ids))
-                resp = self.post(url, data={
-                    "id": ','.join(ids),
-                    "include_ext_alt_text": 'true'
-                })
-                tweets = resp.json()
-                tweets.sort(key=lambda t: t['id_str'])
-                for tweet in tweets:
+                for tweet in get(ids):
                     yield tweet
                 ids = []
 
         # hydrate any remaining ones
         if len(ids) > 0:
             log.info("hydrating %s", ids)
-            resp = self.post(url, data={
-                "id": ','.join(ids),
-                "include_ext_alt_text": 'true'
-            })
-            for tweet in resp.json():
+            for tweet in get(ids):
                 yield tweet
 
     def tweet(self, tweet_id):
@@ -678,10 +692,12 @@ class Twarc(object):
         if not self.client:
             self.connect()
 
-        if "params" in kwargs:
+        labs = "api.twitter.com/labs" in args[0]
+
+        if "params" in kwargs and not labs:
             kwargs["params"]["tweet_mode"] = self.tweet_mode
-        else:
-            kwargs["params"] = {"tweet_node": self.tweet_mode}
+        elif not labs:
+            kwargs["params"] = {"tweet_mode": self.tweet_mode}
 
         # Pass allow 404 to not retry on 404
         allow_404 = kwargs.pop('allow_404', False)

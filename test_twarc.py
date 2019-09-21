@@ -483,6 +483,13 @@ def test_hydrate():
         count += 1
     assert count > 100  # may need to adjust as these might get deleted
 
+def test_labs_hydrate():
+    # top 3 tweets in 2017
+    tweets = ["896523232098078720", "866849021519966208", "440322224407314432"]
+    count = 0
+    for tweet in T.hydrate(tweets, labs=True):
+        count += 1
+    assert count == 3
 
 @patch("twarc.client.OAuth1Session", autospec=True)
 def test_connection_error_get(oauth1session_class):
@@ -624,3 +631,5 @@ def test_invalid_credentials():
         T.validate_keys()
 
     T.consumer_key = old_consumer_key
+
+
