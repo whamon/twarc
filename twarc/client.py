@@ -488,8 +488,10 @@ class Twarc(object):
                     "user.format": "detailed",
                     "place.format": "detailed",
                     "expansions": "attachments.poll_ids,attachments.media_keys,author_id,entities.mentions.username,geo.place_id,in_reply_to_user_id,referenced_tweets.id,referenced_tweets.id.author_id"
-                }).json()["data"]
-                tweets.sort(key=lambda t: t["id"])
+                }).json()
+                # labs endpoint returns an object with keys for data, includes, errors
+                # so we put the object into a list so it can be yielded from below
+                tweets = [tweets]
             else:
                 tweets = self.post(url, data={
                     "id": ",".join(ids),

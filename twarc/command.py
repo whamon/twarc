@@ -137,7 +137,7 @@ def main():
             mode='r',
             openhook=fileinput.hook_compressed,
         )
-        things = t.hydrate(input_iterator)
+        things = t.hydrate(input_iterator, labs=args.labs)
 
     elif command == "tweet":
         things = [t.tweet(query)]
@@ -274,6 +274,9 @@ def main():
         elif 'woeid' in thing:
             # places
             print(json.dumps(thing), file=fh)
+        elif 'data' in thing:
+            # labs endpoint
+            print(json.dumps(thing), file=fh)
         elif 'tweet_volume' in thing:
             # trends
             print(json.dumps(thing), file=fh)
@@ -352,6 +355,8 @@ def get_argparser():
                         help="used with --output to split into numbered files")
     parser.add_argument("--skip_key_validation", action="store_true",
                         help="skip checking keys are valid on startup")
+    parser.add_argument("--labs", action="store_true", default=False,
+                        help="use the experimental labs API endpoint")
 
     return parser
 
