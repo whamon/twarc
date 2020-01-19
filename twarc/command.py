@@ -174,10 +174,12 @@ def main():
             things = t.user_lookup(ids=query.split(","), id_type='screen_name')
 
     elif command == "followers":
-        things = t.follower_ids(query)
+        # things = t.follower_ids(query)
+        things = t.follower_ids(query,args.max_pages)
 
     elif command == "friends":
-        things = t.friend_ids(query)
+        # things = t.friend_ids(query)
+        things = t.friend_ids(query,args.max_pages)
 
     elif command == "trends":
         # lookup woeid for geo-coordinate if appropriate
@@ -325,6 +327,8 @@ def get_argparser():
                         help="maximum tweet id to search for")
     parser.add_argument("--since_id", dest="since_id",
                         help="smallest id to search for")
+    parser.add_argument("--max_pages", dest="max_pages",
+                        help="Maximum page # of followers/friends ids to retrieve")
     parser.add_argument("--result_type", dest="result_type",
                         choices=["mixed", "recent", "popular"],
                         default="recent", help="search result type")

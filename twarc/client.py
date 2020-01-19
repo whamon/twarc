@@ -284,7 +284,7 @@ class Twarc(object):
                 yield str_type(user_id)
             params['cursor'] = user_ids['next_cursor']
             
-            if max_pages is not None and retrieved_pages == max_pages:
+            if max_pages is not None and retrieved_pages >= int(max_pages):
                 log.info("reached max follower page limit for %s", params)
                 break
 
@@ -318,7 +318,7 @@ class Twarc(object):
                 yield str_type(user_id)
             params['cursor'] = user_ids['next_cursor']
 
-            if max_pages is not None and retrieved_pages == max_pages:
+            if max_pages is not None and retrieved_pages >= int(max_pages):
                 log.info("reached max friend page limit for %s", params)
                 break
 
