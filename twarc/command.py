@@ -44,6 +44,7 @@ commands = [
     'sample',
     'search',
     'timeline',
+    'mentions',
     'favorites',
     'trends',
     'tweet',
@@ -153,6 +154,14 @@ def main():
         elif query:
             kwargs["screen_name"] = query
         things = t.timeline(**kwargs)
+
+    elif command == "mentions":
+        kwargs = {"max_id": args.max_id, "since_id": args.since_id}
+        if re.match('^[0-9]+$', query):
+            kwargs["user_id"] = query
+        elif query:
+            kwargs["screen_name"] = query
+        things = t.mentions(**kwargs)
 
     elif command == "favorites":
         kwargs = {"max_id": args.max_id, "since_id": args.since_id}
